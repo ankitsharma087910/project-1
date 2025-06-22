@@ -1,7 +1,7 @@
 import { User } from "../models/User.js";
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
-import { transporter } from "../config/nodemailer.js";
+import emailService from "../services/emailService.js";
 
 
 export const userRegisterController = async(req,res)=>{
@@ -23,16 +23,9 @@ export const userRegisterController = async(req,res)=>{
       const verificationToken = crypto.randomBytes(32).toString("hex");
 
       console.log(process.env.EMAIL_USER,'email')
+      
       // Send verification email
-      const verificationUrl = `http://localhost:4000/api/verify/${verificationToken}`;
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Email Verification",
-        html: `<p>Please verify your email by clicking <a href="${verificationUrl}">here</a></p>`,
-      };
-
-      await transporter.sendMail(mailOptions);
+       await emailService.sendVerificationEmail(email,verificationToken);
 
       // Create user
       const user = new User({
@@ -46,6 +39,7 @@ export const userRegisterController = async(req,res)=>{
       res.status(201).json({
         message:
           "Registration successful. Please check your email for verification.",
+          success:true,
       });
     }catch(err){
         console.log(err);

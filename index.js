@@ -1,15 +1,20 @@
 import express from "express"
-import { connectToDB } from "./database/db.js";
+import { connectToDB } from "./src/database/db.js";
 import dotenv from "dotenv";
-import authRoutes from './routes/auth-routes.js';
+import authRoutes from './src/routes/auth-routes.js';
 import cors from 'cors'
-import { User } from "./models/User.js";
+import { User } from "./src/models/User.js";
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 
 app.use("/api/auth",authRoutes);
 
@@ -35,9 +40,8 @@ app.get("/api/verify/:token", async (req, res) => {
 });
   
 
-const port = 4000;
 connectToDB().then(()=>{
-    app.listen(port, () => {
-      console.log(`server is running on port ${port}`);
+    app.listen(process.env.PORT, () => {
+      console.log(`server is running on port ${process.env.PORT}`);
     });
 })
