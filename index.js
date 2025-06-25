@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRoutes from './src/routes/auth-routes.js';
 import cors from 'cors'
 import { User } from "./src/models/User.js";
+import logger from "./src/utils/logger.js";
 dotenv.config();
 const app = express();
 
@@ -21,6 +22,20 @@ app.use("/api/auth",authRoutes);
 app.get("/",(req,res)=>{
     console.log('req')
 })
+
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
+
+  logger.error(
+    `${err.statusCode} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`
+  );
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
+});
 
 
 

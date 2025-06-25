@@ -1,11 +1,18 @@
 
 import express  from 'express';
-import { userLoginController, userRegisterController } from '../controllers/auth-controllers.js';
+import { logoutController, refreshTokenController, userLoginController, userRegisterController, verifyEmailController } from '../controllers/auth-controllers.js';
+import protect from '../middleware/authMiddleware.js';
+import { getProfileController } from '../controllers/user-controllers.js';
 
 
 const router = express.Router();
 
 router.post("/register",userRegisterController);
-router.post("/login",userLoginController);
+router.get("/verify/:token", verifyEmailController);
+router.post("/login", userLoginController);
+router.post("/refresh-token", refreshTokenController);
+router.post("/logout", logoutController);
+router.get("/profile", protect, getProfileController);
+
 
 export default router;
