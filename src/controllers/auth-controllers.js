@@ -30,6 +30,7 @@ export const userRegisterController = async(req,res)=>{
       const user = new User({
         email,
         password,
+        name,
         verificationToken,
       });
 

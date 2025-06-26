@@ -2,6 +2,8 @@ import express from "express"
 import { connectToDB } from "./src/database/db.js";
 import dotenv from "dotenv";
 import authRoutes from './src/routes/auth-routes.js';
+import articleRoutes from "./src/routes/article-routes.js";
+
 import cors from 'cors'
 import { User } from "./src/models/User.js";
 import logger from "./src/utils/logger.js";
@@ -18,6 +20,7 @@ app.use(
 );
 
 app.use("/api/auth",authRoutes);
+app.use('/api/article',articleRoutes)
 
 app.get("/",(req,res)=>{
     console.log('req')
