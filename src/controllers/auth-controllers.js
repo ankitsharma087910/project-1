@@ -96,27 +96,18 @@ export const userLoginController = async(req,res,next)=>{
     const accessToken = TokenService.generateAccessToken(user._id);
     const refreshToken = TokenService.generateRefreshToken(user._id);
 
-   
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: "/refresh-token", // Restrict to refresh endpoint
+      // path: "/refresh-token", // Restrict to refresh endpoint
     });
 
-    
     user.refreshToken = refreshToken;
     await user.save();
 
-    const data = { userId: user._id };
+    const data = { userId: user._id ,accessToken };
 
     return responseHandler(res, 200, data, "Login Successfully");
   }catch(error){

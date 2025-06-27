@@ -3,6 +3,8 @@ import { connectToDB } from "./src/database/db.js";
 import dotenv from "dotenv";
 import authRoutes from './src/routes/auth-routes.js';
 import articleRoutes from "./src/routes/article-routes.js";
+import categoryRoutes from "./src/routes/category-routes.js";
+
 
 import cors from 'cors'
 import { User } from "./src/models/User.js";
@@ -16,11 +18,14 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use("/api/auth",authRoutes);
-app.use('/api/article',articleRoutes)
+app.use('/api/article',articleRoutes);
+app.use("/api/category", categoryRoutes);
+
 
 app.get("/",(req,res)=>{
     console.log('req')

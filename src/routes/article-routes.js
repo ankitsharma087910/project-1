@@ -8,7 +8,7 @@ const router = express.Router();
 
 
 router.post("/",uploadMiddleware.single("image"),protect,createArticleController);
-router.get("/", getArticlesController);
+router.get("/",protect, getArticlesController);
 router.get('/:id/',getArticleController);
 router.patch("/:id/", protect,updateArticleController);
 router.delete("/:id/",protect, deleteArticleController);
