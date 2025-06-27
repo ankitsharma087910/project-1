@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { ImageSchema } from "./Image.js";
 
 const commentSchema = Schema({
     content:{
@@ -30,7 +31,8 @@ const articleSchema = Schema({
     trim: true,
   },
   image: {
-    type: String,
+    type: ImageSchema,
+    required:false
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,

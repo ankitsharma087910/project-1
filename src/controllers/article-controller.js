@@ -27,6 +27,13 @@ export const getArticlesController = ()=>{
 
 }
 
-export const createArticleController = ()=>{
-    
+export const createArticleController = (req,res,next)=>{
+    try{
+        const res = req.body;
+        const file = req.file;
+        console.log(res,file);
+
+    }catch(err){
+
+    }
 }
