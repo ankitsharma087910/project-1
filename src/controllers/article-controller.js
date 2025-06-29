@@ -1,4 +1,3 @@
-import { populate } from "dotenv";
 import { Article } from "../models/Article.js"
 import { responseHandler } from "../utils/responseHandler.js"
 import { uploadToCloudinary } from './../helpers/cloudinaryHelper.js';
@@ -10,10 +9,12 @@ export const getTopRatedArticles = async(req,res)=>{
 
     // Fetch top rated articles based on likes
     const articles = await Article.find()
-      .sort({ likes: -1 }) // Sort by likes in descending order
-      .limit(10) // Limit to top 10 articles
-      .populate("category", "name") // Populate category name
-      .populate("author", "-password -refreshToken"); // Populate author without sensitive fields
+    console.log(articles,'articles')
+
+      // .sort({ likes: -1 }) // Sort by likes in descending order
+      // .limit(10) // Limit to top 10 articles
+      // .populate("category", "name") // Populate category name
+      // .populate("author", "-password -refreshToken"); // Populate author without sensitive fields
 
     if (!articles || articles.length === 0) {
       return responseHandler(res, 404, null, "No top rated articles found");
@@ -25,40 +26,6 @@ export const getTopRatedArticles = async(req,res)=>{
     return responseHandler(res, 500, null, "Internal Server Error");
   }
 }
-export const addCommentController = async(req,res)=>{
-  try{
- 
-    const articleId = req.params.id;
-    const { comment } = req.body;
-
-    // Validate input
-    if (!comment) {
-      return responseHandler(res, 400, null, "Comment is required");
-    }
-
-    // Find the article by ID
-    const article = await Article.findById(articleId);
-    if (!article) {
-      return responseHandler(res, 404, null, "Article not found");
-    }
-
-    // Add the comment to the article's comments array
-    article.comments.push({
-      user: req.user._id,
-      comment,
-      createdAt: new Date()
-    });
-
-    // Save the updated article
-    await article.save();
-
-    return responseHandler(res, 200, null, "Comment added successfully");
-  }catch(err){
-    console.log(err, 'error adding comment');
-    return responseHandler(res, 500, null, "Internal Server Error");
-  }
-
-}
 
 export const likeArticleController= async(req,res)=>{
 
@@ -66,20 +33,31 @@ export const likeArticleController= async(req,res)=>{
     const articleId = req.params.id;
     const userId = req.user._id;
 
-    // Find the article by ID
-    const article = await Article.findById(articleId);
+
     if (!article) {
       return responseHandler(res, 404, null, "Article not found");
     }
 
-    // Check if the user has already liked the article
-    if (article.likes.includes(userId)) {
-      return responseHandler(res, 400, null, "You have already liked this article");
-    }
 
-    // Add the user's ID to the likes array
-    article.likes.push(userId);
-    
+    // Find the article by ID
+    const article = await Article.findById(articleId);
+
+  // check if the article is already liked by the user
+     const isLiked = article.likes.includes(userId);
+     if(isLiked){
+      // remove the user from likes array
+      article.likes = article.likes.filter((like)=>like.toString() !== userId.toString());
+      return responseHandler(
+        res,
+        400,
+        null,
+        "Article already liked by you, removed from likes"
+      );
+
+     }else{
+      article.likes.push(userId);
+     }
+
     // Save the updated article
     await article.save();
 

@@ -2,22 +2,27 @@ import mongoose, { Schema } from "mongoose";
 import { ImageSchema } from "./Image.js";
 
 const commentSchema = Schema({
-    content:{
-        type:String,
-        required:[true, 'Comment content is required'],
-        trim:true
+  comment: {
+    type: String,
+    required: [true, "Comment content is required"],
+    trim: true,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  replies: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
     },
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true,
-    },
-    createdAt:{
-        type:Date,
-        default:Date.now()
-    }
-})
-
+  ],
+});
 
 const articleSchema = Schema({
   title: {
@@ -32,7 +37,7 @@ const articleSchema = Schema({
   },
   image: {
     type: ImageSchema,
-    required:false
+    required: false,
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
@@ -50,14 +55,19 @@ const articleSchema = Schema({
       ref: "User",
     },
   ],
-  comments: [commentSchema],
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
   },
   updatedAt: {
     type: Date,
-  }
+  },
 });
 
 articleSchema.pre("save",function(next){
