@@ -5,6 +5,9 @@ import logger from "../utils/logger.js";
 import AppError from './../utils/error.js';
 import TokenService from "../services/tokenService.js";
 import { responseHandler } from "../utils/responseHandler.js";
+import cookieParser from "cookie-parser";
+import { parse } from 'cookie'; 
+
 
 export const userRegisterController = async(req,res)=>{
     try{
@@ -93,21 +96,23 @@ export const userLoginController = async(req,res,next)=>{
       return next(new AppError(401, "Please verify your email first"));
     }
 
+
+
     const accessToken = TokenService.generateAccessToken(user._id);
     const refreshToken = TokenService.generateRefreshToken(user._id);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
+   res.cookie("refreshToken", refreshToken, {
+      httpOnly: false,
+      secure:false,
+      // sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      // path: "/refresh-token", // Restrict to refresh endpoint
     });
 
     user.refreshToken = refreshToken;
     await user.save();
+    console.log(refreshToken,'login token')
 
-    const data = { userId: user._id ,accessToken };
+    const data = { userId: user._id, accessToken};
 
     return responseHandler(res, 200, data, "Login Successfully");
   }catch(error){
@@ -119,12 +124,19 @@ export const userLoginController = async(req,res,next)=>{
 
 export const refreshTokenController = async(req,res,next)=>{
   try{
-    const { refreshToken } = req.body;
+  
+    let refreshToken = parse(req.headers.cookie)["refreshToken"];
+    // console.log(req.refreshToken,'refresh')
+
     if (!refreshToken) {
       return next(new AppError(401, "Refresh token required"));
     }
+
     const decoded = TokenService.verifyRefreshToken(refreshToken);
-    const user = await User.findById(decoded.userId).select("+refreshToken");
+    console.log(decoded,'decoded');
+    
+    const user = await User.findById(decoded.userId)
+    console.log(user,'user');
 
     if (!user || user.refreshToken !== refreshToken) {
       return next(new AppError(401, "Invalid refresh token"));
@@ -133,12 +145,20 @@ export const refreshTokenController = async(req,res,next)=>{
     const newAccessToken = TokenService.generateAccessToken(user._id);
     const newRefreshToken = TokenService.generateRefreshToken(user._id);
 
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: false,
+      secure:false,
+      // sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+       console.log(newRefreshToken,'new refresh token');
     user.refreshToken = newRefreshToken;
     await user.save();
 
     res.status(200).json({
       status: "success",
-      data: { accessToken: newAccessToken, refreshToken: newRefreshToken },
+      data: { accessToken: newAccessToken}
     });
   }catch(error){
     logger.error(`Refresh token error: ${error.message}`);
@@ -159,7 +179,7 @@ export const logoutController = async(req,res,next)=>{
       await user.save();
     }
     res.clearCookie("accessToken");
-    res.clearCookie("refreshToken", { path: "/refresh-token" });
+    res.clearCookie("refreshToken", { path: "/" });
 
     return responseHandler(res, 200, null, "Logged out successfully");
 

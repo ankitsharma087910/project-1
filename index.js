@@ -4,11 +4,9 @@ import dotenv from "dotenv";
 import authRoutes from './src/routes/auth-routes.js';
 import articleRoutes from "./src/routes/article-routes.js";
 import categoryRoutes from "./src/routes/category-routes.js";
-
-
 import cors from 'cors'
-import { User } from "./src/models/User.js";
 import logger from "./src/utils/logger.js";
+// import cookieParser from "cookie-parser";
 dotenv.config();
 const app = express();
 
@@ -26,7 +24,7 @@ app.use("/api/auth",authRoutes);
 app.use('/api/article',articleRoutes);
 app.use("/api/category", categoryRoutes);
 
-
+// app.use(cookieParser())
 app.get("/",(req,res)=>{
     console.log('req')
 })
@@ -46,21 +44,6 @@ app.use((err, req, res, next) => {
 });
 
 
-
-app.get("/api/verify/:token", async (req, res) => {
-  const token = req.params.token;
-
-  const user = await User.findOne({ verificationToken: token });
-  if (!user) {
-    return res.status(400).send("Invalid or expired verification token.");
-  }
-
-  user.isVerified = true;
-  user.verificationToken = undefined; // remove the token after verification
-  await user.save();
-
-  res.send("Email verified successfully!");
-});
   
 
 connectToDB().then(()=>{

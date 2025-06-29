@@ -16,5 +16,4 @@ router.post("/:id/like",protect, likeArticleController);
 router.post("/:id/comment",protect, addCommentController);
 router.get("/top-rated",getTopRatedArticles);
 
-
 export default router;

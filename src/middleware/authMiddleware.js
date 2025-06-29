@@ -1,28 +1,39 @@
 import { User } from "../models/User.js";
 import TokenService from "../services/tokenService.js";
 import AppError from "./../utils/error.js";
-import jwt  from 'jsonwebtoken';
- 
-const protect = async (req , res , next)=>{
-  console.log(req?.headers, "token");
-    const token = req?.headers?.authorization.split(" ")[1];
 
-  if (!token) {
-    return next(new AppError("No token provided", 401));
-  }
-  try{
-    const decoded  = TokenService.verifyAccessToken(token);
+const protect = async (req, res, next) => {
+  try {
+    const authHeader = req.headers?.authorization;
+    console.log(authHeader,'header');
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next(
+        new AppError(401, "Authorization token missing or malformed")
+      );
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return next(new AppError(401, "No token provided"));
+    }
+
+    const decoded = TokenService.verifyAccessToken(token);
+
     const user = await User.findById(decoded.userId).select(
-      "-password -refreshToken -verificationToken"
+      "-password -refreshToken"
     );
+
     if (!user) {
       return next(new AppError(401, "User not found"));
     }
+    
     req.user = user;
     next();
-  }catch(err){
-    return next(new AppError(401, "Invalid token"));
+  } catch (err) {
+    return next(new AppError(401, "Invalid or expired token"));
   }
-}
+};
 
 export default protect;

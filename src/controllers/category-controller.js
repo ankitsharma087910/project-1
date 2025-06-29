@@ -17,13 +17,18 @@ export const createCategoryController = async(req , res, next)=>{
         if (!name) {
           return responseHandler(res, 400, null, "Name is required");
         }
-        const createdBy = req.user.email;
+        const createdBy = req.user._id;
         const category = new Category({
           name,
           createdBy,
         });
         await category.save();
-        return responseHandler(res, 201, null, "Category created successfully");
+        return responseHandler(
+          res,
+          201,
+          category,
+          "Category created successfully"
+        );
     }catch(err){
         console.log(err);
     }

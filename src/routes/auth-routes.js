@@ -12,7 +12,7 @@ router.get("/verify/:token", verifyEmailController);
 router.post("/login", userLoginController);
 router.post("/refresh-token", refreshTokenController);
 router.post("/logout", logoutController);
-router.get("/profile", protect, getProfileController);
+router.get("/profile",protect, getProfileController);
 
 
 export default router;
